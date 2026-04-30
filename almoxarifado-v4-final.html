@@ -1899,18 +1899,26 @@ let LICENCA_CHAVE=''; // guarda a chave para verificações periódicas
 
 function initLicenca(){
   const lStatus=document.getElementById('lStatus');
-  if(LICENCA_URL){
-    // Com licença — mostra campo de chave, esconde hints de teste
-    const lc=document.getElementById('licCampo');
-    const lh=document.getElementById('lHint');
-    const lsub=document.getElementById('lSubTitulo');
-    if(lc)lc.style.display='block';
+  const lc=document.getElementById('licCampo');
+  const lsub=document.getElementById('lSubTitulo');
+  const lh=document.getElementById('lHint');
+
+  // 📱 MOBILE — esconde chave, login só por usuário e senha
+  if(_isMobile){
+    if(lc)lc.style.display='none';
+    if(lsub)lsub.textContent='Acesso restrito';
+    if(lStatus)lStatus.textContent='📱 Versão mobile';
     if(lh)lh.style.display='none';
+    return;
+  }
+
+  // 💻 PC — exige chave de licença
+  if(LICENCA_URL||AUTH_URL){
+    if(lc)lc.style.display='block';
+    if(lh)lh && (lh.style.display='none');
     if(lsub)lsub.textContent='Acesso restrito — licença obrigatória';
     if(lStatus)lStatus.textContent='🔒 Sistema licenciado';
   }else{
-    // Sem licença — modo livre
-    const lh=document.getElementById('lHint');
     if(lh)lh.textContent='admin / admin123 · almoxarife / alm123 · mestre / mes123';
     if(lStatus)lStatus.textContent='⚙ Modo desenvolvimento — sem licença';
   }
@@ -2001,6 +2009,9 @@ function verificarLicenca(cb){
 // ════════════════════════════════════════════════════
 //  LOGIN
 // ════════════════════════════════════════════════════
+// Detecta se é celular/tablet
+const _isMobile = /Android|iPhone|iPad|iPod|Mobile|Tablet/i.test(navigator.userAgent);
+
 function doLogin(){
   const email=document.getElementById('lU').value.trim().toLowerCase();
   const senha=document.getElementById('lP').value;
@@ -2015,6 +2026,18 @@ function doLogin(){
     return;
   }
 
+  // Celular/tablet — login local sem chave
+  if(_isMobile){
+    const found=USERS.find(x=>(x.user||x.email||'').toLowerCase()===email&&x.pass===senha&&(x.status||'Ativo')==='Ativo');
+    if(found){efetuarLogin(found);return;}
+    err.style.color='var(--blue)';
+    err.textContent='🔄 Verificando online...';
+    err.style.display='block';
+    _enviarLoginAuth(email,senha,'MOBILE','—');
+    return;
+  }
+
+  // PC — exige chave de licença
   if(AUTH_URL&&!chave){
     err.textContent='⚠ Informe a chave de licença!';
     err.style.color='var(--orange)';
