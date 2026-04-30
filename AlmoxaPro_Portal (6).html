@@ -558,7 +558,7 @@ window.onload = function() {
 // ════════════════════════════════════════════════════════════════
 //  ENTRAR COM CHAVE
 // ════════════════════════════════════════════════════════════════
-async function entrarComChave() {
+function entrarComChave() {
   const chave = document.getElementById('inputChave').value.trim().toUpperCase();
   const user  = document.getElementById('inputUser').value.trim().toLowerCase();
   const senha = document.getElementById('inputSenha').value.trim();
@@ -570,16 +570,11 @@ async function entrarComChave() {
   if (!user || !senha) return mostrarErro('⚠ Informe usuário e senha!');
   if (senha.length < 4) return mostrarErro('⚠ Senha muito curta!');
 
-  if (!/^[a-zA-Z0-9@._#!]{4,}$/.test(senha)) return mostrarErro('⚠ Senha inválida! Mínimo 4 caracteres.');
-
   btn.disabled = true;
   btn.textContent = '⏳ Verificando...';
   showLoading();
 
-  // Hash SHA-256 da senha antes de enviar
-  const senhaHash = await gerarHash(senha);
-
-  chamarAPI({ action: 'login', usuario: user, senha: senhaHash, chave: chave }, function(r) {
+  chamarAPI({ action: 'login', usuario: user, senha: senha, chave: chave }, function(r) {
     hideLoading();
     btn.disabled = false;
     btn.textContent = '🔐 Acessar Portal';
