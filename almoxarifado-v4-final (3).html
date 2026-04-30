@@ -2156,6 +2156,29 @@ document.getElementById('lBtn').addEventListener('click',doLogin);
 document.getElementById('lP').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
 document.getElementById('lU').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
 
+// ✅ SSO — Login automático se veio do Portal
+(function(){
+  try {
+    const sso = JSON.parse(localStorage.getItem('almoxa_sso') || 'null');
+    if (!sso || !sso.user || !sso.chave) return;
+    if (Date.now() - sso.ts > 8 * 60 * 60 * 1000) { localStorage.removeItem('almoxa_sso'); return; }
+    // Entra automaticamente
+    setTimeout(function() {
+      const userSSO = {
+        id:     'SSO-' + sso.user,
+        nome:   sso.nome || sso.user,
+        user:   sso.user,
+        email:  sso.user,
+        pass:   '',
+        perfil: sso.perfil || 'Operador',
+        status: 'Ativo',
+        _sso:   true
+      };
+      efetuarLogin(userSSO);
+    }, 300);
+  } catch(e) {}
+})();
+
 // ════════════════════════════════════════════════════
 //  PERMISSÕES
 // ════════════════════════════════════════════════════
