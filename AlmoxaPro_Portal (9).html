@@ -603,7 +603,7 @@ function entrarComChave() {
   const btn   = document.getElementById('btnEntrar');
 
   err.style.display = 'none';
-  if (!chave) return mostrarErro('⚠ Informe a chave de licença!');
+  // chave opcional
   if (!user || !senha) return mostrarErro('⚠ Informe usuário e senha!');
   if (senha.length < 4) return mostrarErro('⚠ Senha muito curta!');
 
