@@ -574,14 +574,21 @@ let usuariosWorkspace = [];
 //  INIT
 // ════════════════════════════════════════════════════════════════
 window.onload = function() {
-  const saved = localStorage.getItem('almoxa_portal_sessao');
-  if (saved) {
-    try {
-      sessao = JSON.parse(saved);
-      workspace = safeJSON(localStorage.getItem('almoxa_workspace_' + sessao.chave));
-      if (sessao && workspace) { abrirPortal(); return; }
-      if (sessao) { iniciarOnboarding(); return; }
-    } catch(e) {}
+  const saved = safeJSON(localStorage.getItem('almoxa_portal_sessao'));
+  if (saved && saved.token && saved.chave) {
+    chamarAPI({ action: 'login_token', token: saved.token, chave: saved.chave }, function(r) {
+      if (r && r.status === 'ok') {
+        sessao = saved;
+        sessao.nome   = r.nome   || saved.nome;
+        sessao.perfil = r.perfil || saved.perfil;
+        localStorage.setItem('almoxa_sso', JSON.stringify(sessao));
+        workspace = safeJSON(localStorage.getItem('almoxa_workspace_' + sessao.chave));
+        workspace ? abrirPortal() : iniciarOnboarding();
+      } else {
+        localStorage.removeItem('almoxa_portal_sessao');
+        localStorage.removeItem('almoxa_sso');
+      }
+    });
   }
 };
 
@@ -619,6 +626,7 @@ function entrarComChave() {
         ts:     Date.now()
       };
       localStorage.setItem('almoxa_portal_sessao', JSON.stringify(sessao));
+      localStorage.setItem('almoxa_sso', JSON.stringify(sessao));
       workspace = safeJSON(localStorage.getItem('almoxa_workspace_' + chave));
       workspace ? abrirPortal() : iniciarOnboarding();
     } else {
