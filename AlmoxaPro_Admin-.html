@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ALMOXA PRO — Painel Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#050810;--s1:#0a0f1e;--s2:#0f1628;--s3:#141c35;
+  --bd:#1a2540;--bd2:#243060;
+  --blue:#00d4ff;--blue2:#0088cc;--blue3:#004488;
+  --green:#00ff88;--red:#ff3355;--orange:#ff8800;--yellow:#ffdd00;
+  --purple:#aa55ff;
+  --text:#e0eaff;--t2:#6080b0;--t3:#2a3a60;
+  --font:'IBM Plex Sans',sans-serif;--mono:'IBM Plex Mono',monospace;
+  --r:8px;--r2:12px;--r3:20px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+
+/* SCANLINE EFFECT */
+body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,212,255,.01) 2px,rgba(0,212,255,.01) 4px);pointer-events:none;z-index:9999;}
+
+/* LOGIN */
+#loginWrap{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;background:var(--bg);}
+.login-box{width:100%;max-width:420px;padding:48px 40px;border:1px solid var(--bd2);border-radius:var(--r3);background:var(--s1);position:relative;overflow:hidden;animation:fadeIn .5s ease;}
+.login-box::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--blue),transparent);}
+@keyframes fadeIn{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+
+.admin-logo{text-align:center;margin-bottom:32px;}
+.admin-logo-icon{font-size:40px;margin-bottom:8px;}
+.admin-logo-title{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--blue);letter-spacing:4px;}
+.admin-logo-sub{font-size:10px;color:var(--t2);letter-spacing:3px;margin-top:4px;}
+
+.lf{margin-bottom:14px;}
+.lf label{display:block;font-size:9px;font-weight:700;color:var(--t2);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;font-family:var(--mono);}
+.lf input{width:100%;background:var(--s2);border:1px solid var(--bd);border-radius:var(--r);padding:12px 14px;color:var(--text);font-family:var(--mono);font-size:13px;outline:none;transition:.2s;}
+.lf input:focus{border-color:var(--blue);background:var(--s3);box-shadow:0 0 0 2px rgba(0,212,255,.1);}
+
+.btn-login{width:100%;background:var(--blue);color:var(--bg);border:none;border-radius:var(--r);padding:13px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--mono);letter-spacing:2px;transition:.2s;margin-top:8px;}
+.btn-login:hover{background:#00aadd;box-shadow:0 0 20px rgba(0,212,255,.3);}
+.btn-login:disabled{opacity:.5;cursor:not-allowed;}
+.lerr{color:var(--red);font-size:11px;text-align:center;margin-top:10px;font-family:var(--mono);display:none;}
+
+/* APP */
+#app{display:none;min-height:100vh;}
+
+/* TOPBAR */
+.topbar{background:var(--s1);border-bottom:1px solid var(--bd);padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+.top-brand{display:flex;align-items:center;gap:12px;}
+.top-brand-icon{width:32px;height:32px;background:var(--blue);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--bg);}
+.top-brand-name{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--blue);letter-spacing:2px;}
+.top-brand-badge{font-size:9px;background:rgba(255,51,85,.15);color:var(--red);border:1px solid rgba(255,51,85,.3);padding:2px 8px;border-radius:4px;letter-spacing:1px;font-family:var(--mono);}
+.top-right{display:flex;align-items:center;gap:16px;}
+.top-user{font-size:12px;color:var(--t2);font-family:var(--mono);}
+.top-user span{color:var(--blue);}
+.btn-sair{background:transparent;border:1px solid var(--bd);color:var(--t2);border-radius:var(--r);padding:5px 12px;font-size:10px;cursor:pointer;font-family:var(--mono);letter-spacing:1px;transition:.2s;}
+.btn-sair:hover{border-color:var(--red);color:var(--red);}
+
+/* LAYOUT */
+.layout{display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - 56px);}
+
+/* SIDEBAR */
+.sidebar{background:var(--s1);border-right:1px solid var(--bd);padding:20px 0;}
+.nav-section{padding:0 16px;margin-bottom:20px;}
+.nav-section-title{font-size:9px;font-weight:700;color:var(--t3);letter-spacing:2px;text-transform:uppercase;font-family:var(--mono);padding:0 8px;margin-bottom:8px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 8px;border-radius:var(--r);cursor:pointer;transition:.15s;font-size:12px;color:var(--t2);margin-bottom:2px;}
+.nav-item:hover{background:var(--s2);color:var(--text);}
+.nav-item.active{background:rgba(0,212,255,.1);color:var(--blue);border:1px solid rgba(0,212,255,.2);}
+.nav-item-icon{font-size:14px;width:20px;text-align:center;}
+
+/* CONTEÚDO */
+.content{padding:28px;overflow-y:auto;}
+.page{display:none;}
+.page.active{display:block;}
+.page-title{font-family:var(--mono);font-size:18px;font-weight:700;color:var(--blue);margin-bottom:4px;letter-spacing:1px;}
+.page-sub{font-size:12px;color:var(--t2);margin-bottom:24px;}
+
+/* KPIs */
+.krow{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px;}
+@media(max-width:900px){.krow{grid-template-columns:repeat(2,1fr);}}
+.kpi{background:var(--s1);border:1px solid var(--bd);border-radius:var(--r2);padding:18px;position:relative;overflow:hidden;}
+.kpi::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;}
+.kpi.bl::after{background:var(--blue);}
+.kpi.gr::after{background:var(--green);}
+.kpi.re::after{background:var(--red);}
+.kpi.or::after{background:var(--orange);}
+.kpi-label{font-size:9px;font-weight:700;color:var(--t2);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;font-family:var(--mono);}
+.kpi-val{font-family:var(--mono);font-size:32px;font-weight:700;}
+.kpi.bl .kpi-val{color:var(--blue);}
+.kpi.gr .kpi-val{color:var(--green);}
+.kpi.re .kpi-val{color:var(--red);}
+.kpi.or .kpi-val{color:var(--orange);}
+.kpi-sub{font-size:10px;color:var(--t2);margin-top:4px;}
+
+/* CARDS */
+.card{background:var(--s1);border:1px solid var(--bd);border-radius:var(--r2);margin-bottom:20px;}
+.card-head{padding:16px 20px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;}
+.card-title{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--text);letter-spacing:1px;}
+.card-body{padding:20px;}
+
+/* TABELA */
+.tbl{width:100%;border-collapse:collapse;font-size:12px;}
+.tbl th{text-align:left;font-size:9px;font-weight:700;color:var(--t2);letter-spacing:2px;text-transform:uppercase;font-family:var(--mono);padding:8px 12px;border-bottom:1px solid var(--bd);}
+.tbl td{padding:10px 12px;border-bottom:1px solid rgba(26,37,64,.5);}
+.tbl tr:hover td{background:var(--s2);}
+.tbl tr:last-child td{border-bottom:none;}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:4px;font-size:9px;font-weight:700;letter-spacing:1px;font-family:var(--mono);}
+.badge.ativo{background:rgba(0,255,136,.1);color:var(--green);border:1px solid rgba(0,255,136,.2);}
+.badge.bloqueado{background:rgba(255,51,85,.1);color:var(--red);border:1px solid rgba(255,51,85,.2);}
+.badge.expirado{background:rgba(255,136,0,.1);color:var(--orange);border:1px solid rgba(255,136,0,.2);}
+.badge.trial{background:rgba(170,85,255,.1);color:var(--purple);border:1px solid rgba(170,85,255,.2);}
+.badge.admin{background:rgba(0,212,255,.1);color:var(--blue);border:1px solid rgba(0,212,255,.2);}
+.badge.online{background:rgba(0,255,136,.15);color:var(--green);border:1px solid rgba(0,255,136,.3);}
+
+/* BOTÕES */
+.btn{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:var(--r);font-size:10px;font-weight:700;cursor:pointer;border:none;font-family:var(--mono);letter-spacing:1px;transition:.15s;}
+.btn-blue{background:rgba(0,212,255,.15);color:var(--blue);border:1px solid rgba(0,212,255,.3);}
+.btn-blue:hover{background:rgba(0,212,255,.25);}
+.btn-red{background:rgba(255,51,85,.15);color:var(--red);border:1px solid rgba(255,51,85,.3);}
+.btn-red:hover{background:rgba(255,51,85,.25);}
+.btn-green{background:rgba(0,255,136,.15);color:var(--green);border:1px solid rgba(0,255,136,.3);}
+.btn-green:hover{background:rgba(0,255,136,.25);}
+.btn-primary{background:var(--blue);color:var(--bg);border:none;padding:10px 20px;font-size:11px;}
+.btn-primary:hover{background:#00aadd;}
+.btns{display:flex;gap:6px;flex-wrap:wrap;}
+
+/* FORM */
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.fi{margin-bottom:12px;}
+.fi label{display:block;font-size:9px;font-weight:700;color:var(--t2);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;font-family:var(--mono);}
+.fi input,.fi select{width:100%;background:var(--s2);border:1px solid var(--bd);border-radius:var(--r);padding:10px 12px;color:var(--text);font-family:var(--mono);font-size:12px;outline:none;transition:.2s;}
+.fi input:focus,.fi select:focus{border-color:var(--blue);}
+.fi select option{background:var(--s2);}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:200;display:none;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--s1);border:1px solid var(--bd2);border-radius:var(--r3);padding:28px;width:100%;max-width:500px;position:relative;}
+.modal-title{font-family:var(--mono);font-size:15px;font-weight:700;color:var(--blue);margin-bottom:20px;letter-spacing:1px;}
+.modal-close{position:absolute;top:16px;right:16px;background:transparent;border:none;color:var(--t2);cursor:pointer;font-size:18px;}
+.modal-close:hover{color:var(--red);}
+.modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;}
+
+/* MONITOR */
+.monitor-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;}
+.monitor-card{background:var(--s2);border:1px solid var(--bd);border-radius:var(--r2);padding:16px;}
+.monitor-label{font-size:9px;color:var(--t2);letter-spacing:2px;text-transform:uppercase;font-family:var(--mono);margin-bottom:8px;}
+.monitor-val{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--blue);}
+
+/* LINKS MÓDULOS */
+.modulos-links{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
+.modulo-link{background:var(--s2);border:1px solid var(--bd);border-radius:var(--r2);padding:16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:.2s;text-decoration:none;}
+.modulo-link:hover{border-color:var(--blue);background:var(--s3);}
+.modulo-link-info{display:flex;align-items:center;gap:12px;}
+.modulo-link-icon{font-size:24px;}
+.modulo-link-name{font-size:13px;font-weight:600;}
+.modulo-link-url{font-size:10px;color:var(--t2);font-family:var(--mono);}
+.modulo-link-arrow{color:var(--t2);font-size:16px;}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--s1);border:1px solid var(--bd2);border-radius:var(--r);padding:12px 20px;font-size:12px;font-family:var(--mono);z-index:9999;display:none;box-shadow:0 4px 20px rgba(0,0,0,.5);}
+.toast.ok{border-left:3px solid var(--green);color:var(--green);}
+.toast.err{border-left:3px solid var(--red);color:var(--red);}
+.toast.warn{border-left:3px solid var(--orange);color:var(--orange);}
+
+/* ONLINE DOT */
+.online-dot{width:7px;height:7px;background:var(--green);border-radius:50%;display:inline-block;box-shadow:0 0 6px var(--green);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.5;}}
+</style>
+</head>
+<body>
+
+<!-- ════ LOGIN ════ -->
+<div id="loginWrap">
+  <div class="login-box">
+    <div class="admin-logo">
+      <div class="admin-logo-icon">⚙️</div>
+      <div class="admin-logo-title">ALMOXA PRO</div>
+      <div class="admin-logo-sub">PAINEL ADMINISTRATIVO</div>
+    </div>
+    <div class="lf"><label>Usuário Admin</label><input type="text" id="lUser" placeholder="admin" autocapitalize="none" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <div class="lf"><label>Senha</label><input type="password" id="lPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <button class="btn-login" id="lBtn" onclick="doLogin()">[ ACESSAR PAINEL ]</button>
+    <div class="lerr" id="lErr"></div>
+  </div>
+</div>
+
+<!-- ════ APP ════ -->
+<div id="app">
+  <div class="topbar">
+    <div class="top-brand">
+      <div class="top-brand-icon">⚙️</div>
+      <div class="top-brand-name">ALMOXA PRO</div>
+      <div class="top-brand-badge">ADMIN</div>
+    </div>
+    <div class="top-right">
+      <div class="top-user">Logado como: <span id="topUser">—</span></div>
+      <button class="btn-sair" onclick="sair()">[ SAIR ]</button>
+    </div>
+  </div>
+
+  <div class="layout">
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="nav-section">
+        <div class="nav-section-title">Principal</div>
+        <div class="nav-item active" onclick="irPara('dashboard')"><span class="nav-item-icon">📊</span>Dashboard</div>
+        <div class="nav-item" onclick="irPara('monitor')"><span class="nav-item-icon">🖥️</span>Monitor</div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Gestão</div>
+        <div class="nav-item" onclick="irPara('usuarios')"><span class="nav-item-icon">👥</span>Usuários</div>
+        <div class="nav-item" onclick="irPara('licencas')"><span class="nav-item-icon">🔑</span>Licenças</div>
+        <div class="nav-item" onclick="irPara('logs')"><span class="nav-item-icon">📋</span>Logs de Acesso</div>
+        <div class="nav-item" onclick="irPara('salas')"><span class="nav-item-icon">🏢</span>Salas</div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Sistema</div>
+        <div class="nav-item" onclick="irPara('modulos')"><span class="nav-item-icon">📦</span>Módulos</div>
+        <div class="nav-item" onclick="irPara('config')"><span class="nav-item-icon">⚙️</span>Configurações</div>
+      </div>
+    </div>
+
+    <!-- CONTEÚDO -->
+    <div class="content">
+
+      <!-- DASHBOARD -->
+      <div class="page active" id="pg-dashboard">
+        <div class="page-title">DASHBOARD</div>
+        <div class="page-sub">Visão geral do sistema em tempo real</div>
+        <div class="krow">
+          <div class="kpi bl"><div class="kpi-label">Usuários Ativos</div><div class="kpi-val" id="kTotalUsers">—</div><div class="kpi-sub">cadastrados</div></div>
+          <div class="kpi gr"><div class="kpi-label">Licenças Ativas</div><div class="kpi-val" id="kLicAtivas">—</div><div class="kpi-sub">em uso</div></div>
+          <div class="kpi or"><div class="kpi-label">Vencendo em 7d</div><div class="kpi-val" id="kLicVencendo">—</div><div class="kpi-sub">atenção</div></div>
+          <div class="kpi re"><div class="kpi-label">Revogadas</div><div class="kpi-val" id="kLicRevogadas">—</div><div class="kpi-sub">bloqueadas</div></div>
+        </div>
+
+        <!-- WIDGETS -->
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">
+          <div style="background:var(--s1);border:1px solid var(--bd);border-radius:var(--r2);padding:16px;cursor:pointer;" onclick="irPara('usuarios')">
+            <div style="font-size:24px;margin-bottom:8px;">👥</div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--t2);">USUÁRIOS</div>
+            <div style="font-family:var(--mono);font-size:20px;color:var(--blue);" id="wUsuarios">—</div>
+          </div>
+          <div style="background:var(--s1);border:1px solid var(--bd);border-radius:var(--r2);padding:16px;cursor:pointer;" onclick="irPara('licencas')">
+            <div style="font-size:24px;margin-bottom:8px;">🔑</div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--t2);">SALAS ATIVAS</div>
+            <div style="font-family:var(--mono);font-size:20px;color:var(--green);" id="wSalas">—</div>
+          </div>
+          <div style="background:var(--s1);border:1px solid var(--bd);border-radius:var(--r2);padding:16px;cursor:pointer;" onclick="carregarMonitor()">
+            <div style="font-size:24px;margin-bottom:8px;">🖥️</div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--t2);">SCRIPT STATUS</div>
+            <div style="font-family:var(--mono);font-size:20px;" id="wStatus" style="color:var(--t2);">—</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">🟢 USUÁRIOS ONLINE AGORA</div>
+            <button class="btn btn-blue" onclick="carregarOnline()">↻ Atualizar</button>
+          </div>
+          <div class="card-body" id="onlineList">
+            <div style="color:var(--t2);font-size:12px;font-family:var(--mono);">Carregando...</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><div class="card-title">🕐 ÚLTIMOS ACESSOS</div></div>
+          <div class="card-body">
+            <table class="tbl" id="tblLogs"><thead><tr><th>Data/Hora</th><th>Usuário</th><th>Tipo</th><th>Resultado</th></tr></thead><tbody><tr><td colspan="4" style="color:var(--t2);text-align:center;padding:20px;font-family:var(--mono);">Carregando...</td></tr></tbody></table>
+          </div>
+        </div>
+      </div>
+
+      <!-- MONITOR -->
+      <div class="page" id="pg-monitor">
+        <div class="page-title">MONITOR</div>
+        <div class="page-sub">Status do sistema e conexões ativas</div>
+        <div class="monitor-grid" style="margin-bottom:20px;">
+          <div class="monitor-card"><div class="monitor-label">Status do Script</div><div class="monitor-val" id="monStatus" style="color:var(--t2);">Verificando...</div></div>
+          <div class="monitor-card"><div class="monitor-label">Online Agora</div><div class="monitor-val" id="monOnline">—</div></div>
+          <div class="monitor-card"><div class="monitor-label">Última Sincronização</div><div class="monitor-val" style="font-size:13px;" id="monSync">—</div></div>
+          <div class="monitor-card"><div class="monitor-label">Versão do Script</div><div class="monitor-val" style="font-size:14px;" id="monVersao">—</div></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">🔗 URL DO SCRIPT</div></div>
+          <div class="card-body">
+            <div style="font-family:var(--mono);font-size:11px;color:var(--blue);word-break:break-all;padding:12px;background:var(--s2);border-radius:var(--r);border:1px solid var(--bd);" id="monUrl">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- USUÁRIOS -->
+      <div class="page" id="pg-usuarios">
+        <div class="page-title">USUÁRIOS</div>
+        <div class="page-sub">Gerencie os usuários do sistema</div>
+        <div style="margin-bottom:16px;">
+          <button class="btn btn-primary" onclick="abrirModalUsuario()">+ Novo Usuário</button>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">👥 LISTA DE USUÁRIOS</div>
+            <button class="btn btn-blue" onclick="carregarUsuarios()">↻ Atualizar</button>
+          </div>
+          <div class="card-body" style="padding:0;">
+            <table class="tbl" id="tblUsuarios">
+              <thead><tr><th>Usuário</th><th>Nome</th><th>Perfil</th><th>Módulos</th><th>Status</th><th>Ações</th></tr></thead>
+              <tbody><tr><td colspan="6" style="text-align:center;padding:20px;color:var(--t2);font-family:var(--mono);">Carregando...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- LICENÇAS -->
+      <div class="page" id="pg-licencas">
+        <div class="page-title">LICENÇAS</div>
+        <div class="page-sub">Gerencie as licenças dos clientes</div>
+        <div style="margin-bottom:16px;">
+          <button class="btn btn-primary" onclick="abrirModalLicenca()">+ Gerar Licença</button>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">🔑 LISTA DE LICENÇAS</div>
+            <button class="btn btn-blue" onclick="carregarLicencas()">↻ Atualizar</button>
+          </div>
+          <div class="card-body" style="padding:0;">
+            <table class="tbl" id="tblLicencas">
+              <thead><tr><th>Chave</th><th>Cliente</th><th>Validade</th><th>Módulos</th><th>Tipo</th><th>Status</th><th>Ações</th></tr></thead>
+              <tbody><tr><td colspan="7" style="text-align:center;padding:20px;color:var(--t2);font-family:var(--mono);">Carregando...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- LOGS -->
+      <div class="page" id="pg-logs">
+        <div class="page-title">LOGS DE ACESSO</div>
+        <div class="page-sub">Histórico de acessos e atividades</div>
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">📋 HISTÓRICO</div>
+            <button class="btn btn-blue" onclick="carregarLogs()">↻ Atualizar</button>
+          </div>
+          <div class="card-body" style="padding:0;">
+            <table class="tbl" id="tblLogsCompleto">
+              <thead><tr><th>Data/Hora</th><th>Usuário</th><th>Tipo</th><th>Resultado</th></tr></thead>
+              <tbody><tr><td colspan="4" style="text-align:center;padding:20px;color:var(--t2);font-family:var(--mono);">Carregando...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- SALAS -->
+      <div class="page" id="pg-salas">
+        <div class="page-title">SALAS DE TRABALHO</div>
+        <div class="page-sub">Cada licença é uma sala com seus membros e módulos</div>
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">🏢 SALAS ATIVAS</div>
+            <button class="btn btn-blue" onclick="carregarSalas()">↻ Atualizar</button>
+          </div>
+          <div class="card-body" id="salasContainer">
+            <div style="color:var(--t2);font-family:var(--mono);font-size:12px;">Carregando salas...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MÓDULOS -->
+      <div class="page" id="pg-modulos">
+        <div class="page-title">MÓDULOS</div>
+        <div class="page-sub">Acesso rápido a todos os módulos do sistema</div>
+        <div class="modulos-links" id="modulosLinks"></div>
+      </div>
+
+      <!-- CONFIG -->
+      <div class="page" id="pg-config">
+        <div class="page-title">CONFIGURAÇÕES</div>
+        <div class="page-sub">Configurações do painel administrativo</div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">🔒 ALTERAR SENHA ADMIN</div></div>
+          <div class="card-body">
+            <div class="fg">
+              <div class="fi"><label>Nova Senha</label><input type="password" id="cfgSenha" placeholder="Nova senha"></div>
+              <div class="fi"><label>Confirmar Senha</label><input type="password" id="cfgSenha2" placeholder="Confirmar"></div>
+            </div>
+            <button class="btn btn-primary" onclick="alterarSenha()">Salvar Senha</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">🔗 URL DO SCRIPT</div></div>
+          <div class="card-body">
+            <div class="fi"><label>URL Atual</label><input type="text" id="cfgUrl" placeholder="https://script.google.com/..."></div>
+            <button class="btn btn-primary" onclick="salvarUrl()">Salvar URL</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /layout -->
+</div><!-- /app -->
+
+<!-- MODAL USUÁRIO -->
+<div class="modal-overlay" id="modalUsuario">
+  <div class="modal">
+    <div class="modal-title" id="modalUsuarioTitulo">➕ NOVO USUÁRIO</div>
+    <button class="modal-close" onclick="fecharModal('modalUsuario')">✕</button>
+    <div class="fg">
+      <div class="fi"><label>Nome</label><input type="text" id="uNome" placeholder="Nome completo"></div>
+      <div class="fi"><label>Usuário (login)</label><input type="text" id="uUser" placeholder="usuario" autocapitalize="none"></div>
+    </div>
+    <div class="fg">
+      <div class="fi"><label>Senha</label><input type="text" id="uSenha" placeholder="Mínimo 6 caracteres"></div>
+      <div class="fi"><label>Perfil</label>
+        <select id="uPerfil">
+          <option value="operador">Operador</option>
+          <option value="almoxarife">Almoxarife</option>
+          <option value="mestre">Mestre de Obra</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+    </div>
+    <div class="fi"><label>Módulos (separados por vírgula)</label><input type="text" id="uModulos" placeholder="almoxarife,projetos,planta,dashboard"></div>
+    <div class="fi"><label>Chave de Licença (opcional)</label><input type="text" id="uChave" placeholder="AAA-XXXX-0000" style="text-transform:uppercase;"></div>
+    <div class="modal-footer">
+      <button class="btn btn-blue" onclick="fecharModal('modalUsuario')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarUsuario()">✓ Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL LICENÇA -->
+<div class="modal-overlay" id="modalLicenca">
+  <div class="modal">
+    <div class="modal-title">🔑 GERAR NOVA LICENÇA</div>
+    <button class="modal-close" onclick="fecharModal('modalLicenca')">✕</button>
+    <div class="fg">
+      <div class="fi"><label>Nome da Sala / Workspace</label><input type="text" id="lSala" placeholder="Ex: Obra Jardins - Equipe A"></div>
+      <div class="fi"><label>Responsável (nome)</label><input type="text" id="lNome" placeholder="Ex: João Silva"></div>
+      <div class="fi"><label>Usuário (login)</label><input type="text" id="lUser2" placeholder="joaosilva" autocapitalize="none"></div>
+    </div>
+    <div class="fg">
+      <div class="fi"><label>Senha Inicial</label><input type="text" id="lSenha" placeholder="Mínimo 6 caracteres"></div>
+      <div class="fi"><label>Perfil</label>
+        <select id="lPerfil">
+          <option value="operador">Operador</option>
+          <option value="almoxarife">Almoxarife</option>
+          <option value="mestre">Mestre de Obra</option>
+        </select>
+      </div>
+    </div>
+    <div class="fi"><label>Módulos Contratados</label>
+      <select id="lModulos">
+        <option value="almoxarife">Só Almoxarife</option>
+        <option value="almoxarife,dashboard">Almoxarife + Dashboard</option>
+        <option value="almoxarife,projetos">Almoxarife + Projetos</option>
+        <option value="almoxarife,projetos,planta,dashboard">Pacote Completo</option>
+      </select>
+    </div>
+    <div class="fi"><label>Validade</label>
+      <select id="lDias">
+        <option value="1">1 dia (teste)</option>
+        <option value="7">7 dias (trial)</option>
+        <option value="30">30 dias</option>
+        <option value="90">3 meses</option>
+        <option value="180">6 meses</option>
+        <option value="365" selected>1 ano</option>
+        <option value="0">Ilimitada</option>
+      </select>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-blue" onclick="fecharModal('modalLicenca')">Cancelar</button>
+      <button class="btn btn-primary" onclick="gerarLicenca()">🔑 Gerar Licença</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ════════════════════════════════════════════════════════════════
+//  CONFIG
+// ════════════════════════════════════════════════════════════════
+const BASE_URL = 'https://biriguialmoxarifado-eng.github.io/almoxapro/';
+
+const MODULOS_INFO = [
+  { id:'almoxarife', icon:'📦', nome:'Almoxarife Pro',   url:'almoxarifado-v4-final.html', desc:'Estoque, movimentos, NFs' },
+  { id:'projetos',   icon:'📐', nome:'Projetos',          url:'ALMOXA_Projetos_corrigido-2.html', desc:'OS, RCs, PEPs, atividades' },
+  { id:'planta',     icon:'🏠', nome:'Planta / Casas',    url:'ALMOXA_Planta_corrigido-2.html', desc:'Unidades e etapas' },
+  { id:'dashboard',  icon:'📊', nome:'Dashboard',         url:'ALMOXA_Dashboard_corrigido-1.html', desc:'KPIs e relatórios' },
+  { id:'portal',     icon:'🚪', nome:'Portal do Usuário', url:'AlmoxaPro_Portal-20.html', desc:'Acesso dos clientes' },
+  { id:'admin',      icon:'⚙️', nome:'Painel Admin',      url:'admin.html', desc:'Este painel' },
+];
+
+let SCRIPT_URL = localStorage.getItem('admin_script_url') ||
+  'https://script.google.com/macros/s/AKfycbxGqi4GbgUk9k5C9l0dHHAhmFJNy_uCqiZ1yNzq6J0PjOuHXo8YUybaZQ1qul5eO3zV/exec';
+
+let adminUser = null;
+let adminToken = null;
+
+// ════════════════════════════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════════════════════════════
+window.onload = function() {
+  // Auto-login se tiver token salvo
+  const saved = JSON.parse(localStorage.getItem('admin_sessao') || 'null');
+  if (saved && saved.token) {
+    chamarAPI({ action:'login_token', token:saved.token }, function(r) {
+      if (r && r.status === 'ok' && (r.perfil === 'admin' || saved.perfil === 'admin')) {
+        adminUser = saved.user;
+        adminToken = saved.token;
+        abrirApp(saved.nome || saved.user);
+      }
+    });
+  }
+  document.getElementById('cfgUrl').value = SCRIPT_URL;
+};
+
+// ════════════════════════════════════════════════════════════════
+//  LOGIN
+// ════════════════════════════════════════════════════════════════
+function doLogin() {
+  const user = document.getElementById('lUser').value.trim().toLowerCase();
+  const pass = document.getElementById('lPass').value.trim();
+  const err  = document.getElementById('lErr');
+  const btn  = document.getElementById('lBtn');
+
+  err.style.display = 'none';
+  if (!user || !pass) { err.textContent = '⚠ Preencha usuário e senha!'; err.style.display = 'block'; return; }
+
+  btn.disabled = true;
+  btn.textContent = '[ VERIFICANDO... ]';
+
+  chamarAPI({ action:'login', usuario:user, senha:pass }, function(r) {
+    btn.disabled = false;
+    btn.textContent = '[ ACESSAR PAINEL ]';
+
+    if (r && r.status === 'ok') {
+      if (r.perfil !== 'admin') {
+        err.textContent = '⛔ Acesso negado! Apenas administradores.';
+        err.style.display = 'block';
+        return;
+      }
+      adminUser  = user;
+      adminToken = r.token;
+      localStorage.setItem('admin_sessao', JSON.stringify({ user, nome:r.nome, token:r.token, perfil:r.perfil }));
+      abrirApp(r.nome || user);
+    } else {
+      err.textContent = '❌ ' + (r && r.msg ? r.msg : 'Erro de login!');
+      err.style.display = 'block';
+    }
+  });
+}
+
+function abrirApp(nome) {
+  document.getElementById('loginWrap').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('topUser').textContent = nome;
+  carregarDashboard();
+  carregarModulos();
+}
+
+function sair() {
+  if (adminToken) chamarAPI({ action:'logout', token:adminToken }, function(){});
+  localStorage.removeItem('admin_sessao');
+  adminUser = adminToken = null;
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('loginWrap').style.display = 'flex';
+  document.getElementById('lUser').value = '';
+  document.getElementById('lPass').value = '';
+}
+
+// ════════════════════════════════════════════════════════════════
+//  NAVEGAÇÃO
+// ════════════════════════════════════════════════════════════════
+function irPara(pg) {
+  document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); });
+  document.getElementById('pg-' + pg).classList.add('active');
+  event.currentTarget.classList.add('active');
+
+  if (pg === 'usuarios')  carregarUsuarios();
+  if (pg === 'licencas')  carregarLicencas();
+  if (pg === 'logs')      carregarLogs();
+  if (pg === 'monitor')   carregarMonitor();
+}
+
+// ════════════════════════════════════════════════════════════════
+//  DASHBOARD
+// ════════════════════════════════════════════════════════════════
+function carregarDashboard() {
+  // Carrega usuários para KPI
+  chamarAPI({ action:'listarUsuarios' }, function(r) {
+    if (r && r.usuarios) {
+      document.getElementById('kTotalUsers').textContent = r.usuarios.length;
+      if(document.getElementById('wUsuarios')) document.getElementById('wUsuarios').textContent = r.usuarios.length;
+    }
+  });
+  // Carrega licenças para KPIs
+  chamarAPI({ action:'listarLicencas' }, function(r) {
+    if (r && r.licencas) {
+      var ativas    = r.licencas.filter(function(l){return l.status==='Ativa';}).length;
+      var revogadas = r.licencas.filter(function(l){return l.status==='Revogada';}).length;
+      var vencendo  = r.licencas.filter(function(l){
+        if (l.status !== 'Ativa' || l.validade === 'Ilimitada') return false;
+        var val = new Date(l.validade.split('/').reverse().join('-'));
+        var diff = (val - new Date()) / (1000*60*60*24);
+        return diff >= 0 && diff <= 7;
+      }).length;
+      document.getElementById('kLicAtivas').textContent    = ativas;
+      document.getElementById('kLicRevogadas').textContent = revogadas;
+      document.getElementById('kLicVencendo').textContent  = vencendo;
+      if(document.getElementById('wSalas')) document.getElementById('wSalas').textContent = ativas;
+    }
+  });
+  carregarOnline();
+  carregarLogsRecentes();
+}
+
+function carregarOnline() {
+  chamarAPI({ action:'get_presence' }, function(r) {
+    var el = document.getElementById('onlineList');
+    if (r && r.online && r.online.length > 0) {
+      el.innerHTML = r.online.map(function(u) {
+        return '<div style="display:flex;align-items:center;gap:10px;padding:8px;background:var(--s2);border-radius:var(--r);margin-bottom:6px;">' +
+          '<span class="online-dot"></span>' +
+          '<span style="font-family:var(--mono);font-size:12px;color:var(--green);">' + u.nome + '</span>' +
+          '</div>';
+      }).join('');
+    } else {
+      el.innerHTML = '<div style="color:var(--t2);font-size:12px;font-family:var(--mono);padding:8px;">Nenhum usuário online no momento.</div>';
+    }
+  });
+}
+
+function carregarLogsRecentes() {
+  // Mostra dados do log_acesso
+  var tbody = document.querySelector('#tblLogs tbody');
+  tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--t2);font-family:var(--mono);">Carregando logs...</td></tr>';
+  // Por enquanto mostra mensagem - logs são gravados no script
+  setTimeout(function() {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--t2);font-family:var(--mono);">Veja a aba log_acesso na planilha</td></tr>';
+  }, 1000);
+}
+
+// ════════════════════════════════════════════════════════════════
+//  MONITOR
+// ════════════════════════════════════════════════════════════════
+function carregarMonitor() {
+  document.getElementById('monUrl').textContent = SCRIPT_URL;
+  document.getElementById('monStatus').textContent = 'Verificando...';
+  document.getElementById('monStatus').style.color = 'var(--t2)';
+
+  chamarAPI({ action:'ping' }, function(r) {
+    if (r && r.status === 'ok') {
+      document.getElementById('monStatus').textContent = '● ONLINE';
+      document.getElementById('monStatus').style.color = 'var(--green)';
+      document.getElementById('monVersao').textContent = r.msg || '—';
+      document.getElementById('monSync').textContent = new Date().toLocaleTimeString('pt-BR');
+    } else {
+      document.getElementById('monStatus').textContent = '● OFFLINE';
+      document.getElementById('monStatus').style.color = 'var(--red)';
+    }
+  });
+
+  chamarAPI({ action:'get_presence' }, function(r) {
+    document.getElementById('monOnline').textContent = r && r.online ? r.online.length : 0;
+  });
+}
+
+// ════════════════════════════════════════════════════════════════
+//  USUÁRIOS
+// ════════════════════════════════════════════════════════════════
+function carregarUsuarios() {
+  var tbody = document.querySelector('#tblUsuarios tbody');
+  tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--t2);font-family:var(--mono);">Carregando...</td></tr>';
+
+  chamarAPI({ action:'listarUsuarios' }, function(r) {
+    if (!r || !r.usuarios || !r.usuarios.length) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--t2);font-family:var(--mono);">Nenhum usuário cadastrado</td></tr>';
+      return;
+    }
+    tbody.innerHTML = r.usuarios.map(function(u) {
+      return '<tr>' +
+        '<td style="font-family:var(--mono);color:var(--blue);">' + u.user + '</td>' +
+        '<td>' + u.nome + '</td>' +
+        '<td><span class="badge ' + (u.perfil==='admin'?'admin':'ativo') + '">' + u.perfil.toUpperCase() + '</span></td>' +
+        '<td style="font-size:10px;color:var(--t2);">' + (u.modulos||'—') + '</td>' +
+        '<td><span class="badge ativo">ATIVO</span></td>' +
+        '<td><div class="btns">' +
+          '<button class="btn btn-blue" onclick="editarUsuario(\'' + u.user + '\')">✏️</button>' +
+          '<button class="btn btn-red" onclick="bloquearUsuario(\'' + u.user + '\')">🚫</button>' +
+        '</div></td>' +
+      '</tr>';
+    }).join('');
+  });
+}
+
+function abrirModalUsuario(user) {
+  document.getElementById('modalUsuarioTitulo').textContent = user ? '✏️ EDITAR USUÁRIO' : '➕ NOVO USUÁRIO';
+  document.getElementById('uNome').value = '';
+  document.getElementById('uUser').value = user || '';
+  document.getElementById('uUser').disabled = !!user;
+  document.getElementById('uSenha').value = '';
+  document.getElementById('uModulos').value = 'almoxarife,projetos,planta,dashboard';
+  document.getElementById('uChave').value = '';
+  document.getElementById('modalUsuario').classList.add('open');
+}
+
+function editarUsuario(user) { abrirModalUsuario(user); }
+
+function salvarUsuario() {
+  var nome    = document.getElementById('uNome').value.trim();
+  var user    = document.getElementById('uUser').value.trim().toLowerCase();
+  var senha   = document.getElementById('uSenha').value.trim();
+  var perfil  = document.getElementById('uPerfil').value;
+  var modulos = document.getElementById('uModulos').value.trim();
+  var chave   = document.getElementById('uChave').value.trim().toUpperCase();
+
+  if (!user) { toast('⚠ Informe o usuário!', 'warn'); return; }
+
+  var isEdit = document.getElementById('uUser').disabled;
+
+  if (isEdit) {
+    chamarAPI({ action:'editarUsuario', usuario:user, senha:senha, perfil:perfil, modulos:modulos }, function(r) {
+      if (r && r.status === 'ok') { toast('✅ Usuário atualizado!'); fecharModal('modalUsuario'); carregarUsuarios(); }
+      else toast('❌ ' + (r && r.msg || 'Erro!'), 'err');
+    });
+  } else {
+    if (!senha) { toast('⚠ Informe a senha!', 'warn'); return; }
+    chamarAPI({ action:'criarUsuario', usuario:user, senha:senha, nome:nome, perfil:perfil, modulos:modulos, chave:chave }, function(r) {
+      if (r && r.status === 'ok') { toast('✅ Usuário criado!'); fecharModal('modalUsuario'); carregarUsuarios(); }
+      else toast('❌ ' + (r && r.msg || 'Erro!'), 'err');
+    });
+  }
+}
+
+function bloquearUsuario(user) {
+  if (!confirm('Bloquear usuário ' + user + '?')) return;
+  chamarAPI({ action:'bloquearUsuario', usuario:user }, function(r) {
+    if (r && r.status === 'ok') { toast('🚫 Usuário bloqueado!', 'warn'); carregarUsuarios(); }
+    else toast('❌ Erro!', 'err');
+  });
+}
+
+// ════════════════════════════════════════════════════════════════
+//  LICENÇAS
+// ════════════════════════════════════════════════════════════════
+function carregarLicencas() {
+  var tbody = document.querySelector('#tblLicencas tbody');
+  tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--t2);font-family:var(--mono);">Carregando...</td></tr>';
+
+  chamarAPI({ action:'listarLicencas' }, function(r) {
+    if (!r || !r.licencas || !r.licencas.length) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--t2);font-family:var(--mono);">Nenhuma licença cadastrada</td></tr>';
+      return;
+    }
+    tbody.innerHTML = r.licencas.map(function(l) {
+      var statusClass = l.status==='Ativa'?'ativo':l.status==='Revogada'?'bloqueado':'expirado';
+      var tipoClass   = l.tipo==='Trial'?'trial':'ativo';
+      return '<tr>' +
+        '<td style="font-family:var(--mono);color:var(--blue);font-size:11px;">' + l.chave + '</td>' +
+        '<td>' + l.nome + '</td>' +
+        '<td style="font-family:var(--mono);font-size:11px;">' + l.validade + '</td>' +
+        '<td style="font-size:10px;color:var(--t2);">' + (l.modulos||'—') + '</td>' +
+        '<td><span class="badge ' + tipoClass + '">' + (l.tipo||'Normal').toUpperCase() + '</span></td>' +
+        '<td><span class="badge ' + statusClass + '">' + l.status.toUpperCase() + '</span></td>' +
+        '<td><div class="btns">' +
+          (l.status==='Ativa'
+            ? '<button class="btn btn-red" onclick="revogarLicenca(\'' + l.chave + '\')">🚫 Revogar</button>'
+            : '<button class="btn btn-green" onclick="reativarLicenca(\'' + l.chave + '\')">✅ Reativar</button>') +
+          '<button class="btn btn-blue" onclick="copiarChave(\'' + l.chave + '\')">📋</button>' +
+        '</div></td>' +
+      '</tr>';
+    }).join('');
+  });
+}
+
+function abrirModalLicenca() {
+  ['lNome','lUser2','lSenha'].forEach(function(id){document.getElementById(id).value='';});
+  document.getElementById('modalLicenca').classList.add('open');
+}
+
+function gerarLicenca() {
+  var nome    = document.getElementById('lNome').value.trim();
+  var usuario = document.getElementById('lUser2').value.trim().toLowerCase();
+  var senha   = document.getElementById('lSenha').value.trim();
+  var perfil  = document.getElementById('lPerfil').value;
+  var modulos = document.getElementById('lModulos').value;
+  var dias    = document.getElementById('lDias').value;
+
+  if (!nome) { toast('⚠ Informe o nome!', 'warn'); return; }
+  if (usuario && !senha) { toast('⚠ Informe a senha do usuário!', 'warn'); return; }
+
+  var sala = document.getElementById('lSala').value.trim() || nome;
+  chamarAPI({ action:'gerarLicenca', nome:nome, sala:sala, usuario:usuario, senha:senha, perfil:perfil, modulos:modulos, dias:dias }, function(r) {
+    if (r && r.status === 'ok') {
+      fecharModal('modalLicenca');
+      carregarLicencas();
+      alert('✅ Licença gerada!\n\nChave: ' + r.chave + '\nValidade: ' + r.validade + '\nMódulos: ' + r.modulos + '\n\nEnvie essa chave para o cliente!');
+    } else {
+      toast('❌ ' + (r && r.msg || 'Erro!'), 'err');
+    }
+  });
+}
+
+function revogarLicenca(chave) {
+  if (!confirm('Revogar licença ' + chave + '?')) return;
+  chamarAPI({ action:'revogarLicenca', chave:chave }, function(r) {
+    if (r && r.status === 'ok') { toast('🚫 Licença revogada!', 'warn'); carregarLicencas(); carregarDashboard(); }
+    else toast('❌ Erro!', 'err');
+  });
+}
+
+function reativarLicenca(chave) {
+  chamarAPI({ action:'reativarLicenca', chave:chave }, function(r) {
+    if (r && r.status === 'ok') { toast('✅ Licença reativada!'); carregarLicencas(); carregarDashboard(); }
+    else toast('❌ Erro!', 'err');
+  });
+}
+
+function copiarChave(chave) {
+  navigator.clipboard.writeText(chave).then(function(){ toast('📋 Chave copiada!'); });
+}
+
+// ════════════════════════════════════════════════════════════════
+//  LOGS
+// ════════════════════════════════════════════════════════════════
+function carregarSalas() {
+  var container = document.getElementById('salasContainer');
+  container.innerHTML = '<div style="color:var(--t2);font-family:var(--mono);font-size:12px;">Carregando...</div>';
+
+  chamarAPI({ action:'listarLicencas' }, function(r) {
+    if (!r || !r.licencas || !r.licencas.length) {
+      container.innerHTML = '<div style="color:var(--t2);font-family:var(--mono);font-size:12px;">Nenhuma sala cadastrada.</div>';
+      return;
+    }
+
+    var ativas = r.licencas.filter(function(l){ return l.status === 'Ativa'; });
+    container.innerHTML = ativas.map(function(l) {
+      return '<div style="background:var(--s2);border:1px solid var(--bd);border-radius:var(--r2);padding:16px;margin-bottom:12px;">' +
+        '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">' +
+          '<div>' +
+            '<div style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--blue);">' + (l.sala || l.nome) + '</div>' +
+            '<div style="font-size:10px;color:var(--t2);font-family:var(--mono);">Chave: ' + l.chave + ' · Validade: ' + l.validade + '</div>' +
+          '</div>' +
+          '<div style="display:flex;gap:6px;">' +
+            '<span class="badge ativo">' + l.status.toUpperCase() + '</span>' +
+            '<button class="btn btn-blue" onclick="verMembrosSala(\'' + l.chave + '\',\'' + (l.sala||l.nome) + '\')">👥 Ver Membros</button>' +
+          '</div>' +
+        '</div>' +
+        '<div style="font-size:11px;color:var(--t2);">Módulos: <span style="color:var(--blue);">' + (l.modulos||'—') + '</span></div>' +
+        '<div id="membros-' + l.chave + '" style="margin-top:10px;display:none;"></div>' +
+      '</div>';
+    }).join('');
+
+    if (!ativas.length) {
+      container.innerHTML = '<div style="color:var(--t2);font-family:var(--mono);font-size:12px;">Nenhuma sala ativa.</div>';
+    }
+  });
+}
+
+function verMembrosSala(chave, sala) {
+  var el = document.getElementById('membros-' + chave);
+  if (el.style.display === 'block') { el.style.display = 'none'; return; }
+  el.style.display = 'block';
+  el.innerHTML = '<div style="color:var(--t2);font-family:var(--mono);font-size:11px;">Carregando membros...</div>';
+
+  chamarAPI({ action:'listarSala', chave:chave }, function(r) {
+    if (!r || !r.usuarios || !r.usuarios.length) {
+      el.innerHTML = '<div style="color:var(--t2);font-family:var(--mono);font-size:11px;">Nenhum membro vinculado a esta sala.</div>';
+      return;
+    }
+    el.innerHTML = '<div style="display:flex;flex-wrap:wrap;gap:8px;">' +
+      r.usuarios.map(function(u) {
+        return '<div style="background:var(--s3);border:1px solid var(--bd2);border-radius:var(--r);padding:6px 12px;">' +
+          '<div style="font-family:var(--mono);font-size:11px;color:var(--blue);">' + u.user + '</div>' +
+          '<div style="font-size:10px;color:var(--t2);">' + u.nome + ' · ' + u.perfil + '</div>' +
+        '</div>';
+      }).join('') +
+    '</div>';
+  });
+}
+
+function carregarLogs() {
+  var tbody = document.querySelector('#tblLogsCompleto tbody');
+  tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--t2);font-family:var(--mono);">Os logs ficam na aba log_acesso da planilha Google Sheets.</td></tr>';
+}
+
+// ════════════════════════════════════════════════════════════════
+//  MÓDULOS
+// ════════════════════════════════════════════════════════════════
+function carregarModulos() {
+  var container = document.getElementById('modulosLinks');
+  container.innerHTML = MODULOS_INFO.map(function(m) {
+    return '<a class="modulo-link" href="' + BASE_URL + m.url + '" target="_blank">' +
+      '<div class="modulo-link-info">' +
+        '<div class="modulo-link-icon">' + m.icon + '</div>' +
+        '<div><div class="modulo-link-name">' + m.nome + '</div><div class="modulo-link-url">' + m.url + '</div></div>' +
+      '</div>' +
+      '<div class="modulo-link-arrow">→</div>' +
+    '</a>';
+  }).join('');
+}
+
+// ════════════════════════════════════════════════════════════════
+//  CONFIG
+// ════════════════════════════════════════════════════════════════
+function alterarSenha() {
+  var s1 = document.getElementById('cfgSenha').value.trim();
+  var s2 = document.getElementById('cfgSenha2').value.trim();
+  if (!s1) { toast('⚠ Informe a nova senha!', 'warn'); return; }
+  if (s1 !== s2) { toast('⚠ Senhas não conferem!', 'warn'); return; }
+  chamarAPI({ action:'editarUsuario', usuario:adminUser, senha:s1 }, function(r) {
+    if (r && r.status === 'ok') toast('✅ Senha alterada!');
+    else toast('❌ Erro!', 'err');
+  });
+}
+
+function salvarUrl() {
+  var url = document.getElementById('cfgUrl').value.trim();
+  if (!url) { toast('⚠ URL inválida!', 'warn'); return; }
+  SCRIPT_URL = url;
+  localStorage.setItem('admin_script_url', url);
+  toast('✅ URL salva!');
+}
+
+// ════════════════════════════════════════════════════════════════
+//  HELPERS
+// ════════════════════════════════════════════════════════════════
+function fecharModal(id) { document.getElementById(id).classList.remove('open'); }
+
+function chamarAPI(params, callback) {
+  var url = new URL(SCRIPT_URL);
+  Object.keys(params).forEach(function(k){ url.searchParams.append(k, params[k]); });
+  var cb = 'cb_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+  url.searchParams.append('callback', cb);
+  var s = document.createElement('script');
+  window[cb] = function(data) { delete window[cb]; try{document.head.removeChild(s);}catch(e){} callback(data); };
+  s.src = url.toString();
+  s.onerror = function() { delete window[cb]; callback({ status:'erro', msg:'Erro de conexão' }); };
+  setTimeout(function(){ if(window[cb]){ delete window[cb]; try{s.remove();}catch(e){} callback({ status:'erro', msg:'Timeout' }); } }, 12000);
+  document.head.appendChild(s);
+}
+
+function toast(msg, tipo) {
+  var el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast ' + (tipo || 'ok');
+  el.style.display = 'block';
+  setTimeout(function(){ el.style.display = 'none'; }, 3000);
+}
+</script>
+</body>
+</html>
