@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ALMOXA PRO</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg-base:    #080c12;
+    --bg-card:    #0e1420;
+    --bg-input:   #131926;
+    --bg-hover:   #1a2233;
+    --border:     #1e2d42;
+    --border-hi:  #2a3f5e;
+    --text-1:     #e8eef5;
+    --text-2:     #7a8fa8;
+    --text-3:     #3d5068;
+    --accent:     #3b82f6;
+    --accent-glow:rgba(59,130,246,0.18);
+    --danger:     #ef4444;
+    --success:    #10b981;
+    --warn:       #f59e0b;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Syne', sans-serif;
+    background: var(--bg-base);
+    color: var(--text-1);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── GRID DE FUNDO ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 48px 48px;
+    opacity: 0.35;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── GLOW CENTRAL ── */
+  body::after {
+    content: '';
+    position: fixed;
+    top: -20%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 700px;
+    height: 500px;
+    background: radial-gradient(ellipse, rgba(59,130,246,0.08) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ════════════════════════════
+     TELA DE LOGIN
+  ════════════════════════════ */
+  #tela-login {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 20px;
+  }
+
+  .login-box {
+    width: 100%;
+    max-width: 420px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-hi);
+    border-radius: 16px;
+    padding: 44px 40px;
+    position: relative;
+    z-index: 1;
+    box-shadow: 0 0 80px rgba(59,130,246,0.07), 0 32px 64px rgba(0,0,0,0.5);
+    animation: fadeUp 0.5s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .login-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+
+  .login-logo-icon {
+    width: 42px;
+    height: 42px;
+    background: var(--accent);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    box-shadow: 0 0 20px rgba(59,130,246,0.4);
+  }
+
+  .login-logo-text {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: var(--text-1);
+  }
+
+  .login-logo-text span {
+    color: var(--accent);
+  }
+
+  .login-subtitle {
+    font-size: 13px;
+    color: var(--text-2);
+    margin-bottom: 32px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .campo {
+    margin-bottom: 16px;
+  }
+
+  .campo label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-2);
+    margin-bottom: 8px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .campo input {
+    width: 100%;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 13px 16px;
+    font-size: 15px;
+    font-family: 'Syne', sans-serif;
+    color: var(--text-1);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .campo input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+
+  .campo input::placeholder { color: var(--text-3); }
+
+  .btn-login {
+    width: 100%;
+    padding: 14px;
+    background: var(--accent);
+    border: none;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: 'Syne', sans-serif;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+    box-shadow: 0 4px 20px rgba(59,130,246,0.3);
+    letter-spacing: 0.3px;
+  }
+
+  .btn-login:hover {
+    background: #2563eb;
+    box-shadow: 0 4px 28px rgba(59,130,246,0.45);
+  }
+
+  .btn-login:active { transform: scale(0.98); }
+
+  .btn-login:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .login-erro {
+    margin-top: 14px;
+    padding: 12px 16px;
+    background: rgba(239,68,68,0.1);
+    border: 1px solid rgba(239,68,68,0.3);
+    border-radius: 8px;
+    color: #fca5a5;
+    font-size: 13px;
+    text-align: center;
+    display: none;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .login-versao {
+    margin-top: 24px;
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-3);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ════════════════════════════
+     PORTAL PRINCIPAL
+  ════════════════════════════ */
+  #tela-portal {
+    display: none;
+    min-height: 100vh;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(8,12,18,0.85);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .header-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+  }
+
+  .header-logo-icon {
+    width: 32px;
+    height: 32px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    box-shadow: 0 0 12px rgba(59,130,246,0.35);
+  }
+
+  .header-logo span { color: var(--accent); }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .header-env {
+    font-size: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    background: rgba(245,158,11,0.12);
+    color: var(--warn);
+    border: 1px solid rgba(245,158,11,0.25);
+    padding: 3px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+  }
+
+  .avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    border: 1px solid var(--border-hi);
+    transition: border-color 0.2s;
+  }
+
+  .avatar:hover { border-color: var(--accent); }
+
+  .btn-sair {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-2);
+    font-size: 12px;
+    font-family: 'Syne', sans-serif;
+    padding: 6px 14px;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+  }
+
+  .btn-sair:hover {
+    border-color: var(--danger);
+    color: var(--danger);
+  }
+
+  /* ── CONTEÚDO PRINCIPAL ── */
+  .portal-body {
+    padding: 40px 32px;
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+
+  /* ── BOAS VINDAS ── */
+  .boas-vindas {
+    margin-bottom: 40px;
+    animation: fadeUp 0.4s ease both;
+  }
+
+  .boas-vindas-titulo {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    margin-bottom: 6px;
+  }
+
+  .boas-vindas-titulo span { color: var(--accent); }
+
+  .boas-vindas-sub {
+    font-size: 14px;
+    color: var(--text-2);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ── STATS RÁPIDOS ── */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 40px;
+    animation: fadeUp 0.4s ease 0.1s both;
+  }
+
+  .stat-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    transition: border-color 0.2s;
+  }
+
+  .stat-card:hover { border-color: var(--border-hi); }
+
+  .stat-label {
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text-2);
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+  }
+
+  .stat-valor {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -1px;
+  }
+
+  .stat-desc {
+    font-size: 12px;
+    color: var(--text-3);
+    margin-top: 4px;
+  }
+
+  /* ── SEÇÃO DE OBRAS ── */
+  .secao-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    animation: fadeUp 0.4s ease 0.15s both;
+  }
+
+  .secao-titulo {
+    font-size: 16px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .secao-titulo::before {
+    content: '';
+    display: inline-block;
+    width: 3px;
+    height: 18px;
+    background: var(--accent);
+    border-radius: 2px;
+  }
+
+  .btn-nova-obra {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--accent);
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'Syne', sans-serif;
+    padding: 9px 18px;
+    cursor: pointer;
+    transition: background 0.2s, box-shadow 0.2s;
+    box-shadow: 0 2px 12px rgba(59,130,246,0.25);
+  }
+
+  .btn-nova-obra:hover {
+    background: #2563eb;
+    box-shadow: 0 2px 20px rgba(59,130,246,0.4);
+  }
+
+  /* ── GRID DE OBRAS ── */
+  .obras-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    animation: fadeUp 0.4s ease 0.2s both;
+  }
+
+  .obra-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+    cursor: pointer;
+    transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .obra-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--obra-cor, var(--accent));
+    border-radius: 14px 14px 0 0;
+  }
+
+  .obra-card:hover {
+    border-color: var(--obra-cor, var(--accent));
+    transform: translateY(-3px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.3),
+                0 0 0 1px var(--obra-cor, var(--accent)) inset;
+  }
+
+  .obra-card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .obra-icone {
+    width: 44px;
+    height: 44px;
+    border-radius: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+  }
+
+  .obra-status {
+    font-size: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+  }
+
+  .status-ativo {
+    background: rgba(16,185,129,0.1);
+    color: #34d399;
+    border: 1px solid rgba(16,185,129,0.2);
+  }
+
+  .status-pausado {
+    background: rgba(245,158,11,0.1);
+    color: #fbbf24;
+    border: 1px solid rgba(245,158,11,0.2);
+  }
+
+  .status-encerrado {
+    background: rgba(239,68,68,0.1);
+    color: #f87171;
+    border: 1px solid rgba(239,68,68,0.2);
+  }
+
+  .obra-nome {
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    letter-spacing: -0.3px;
+  }
+
+  .obra-tipo {
+    font-size: 12px;
+    color: var(--text-2);
+    font-family: 'JetBrains Mono', monospace;
+    margin-bottom: 20px;
+  }
+
+  .obra-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin-bottom: 16px;
+  }
+
+  .obra-stats {
+    display: flex;
+    gap: 20px;
+  }
+
+  .obra-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .obra-stat-val {
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  .obra-stat-label {
+    font-size: 10px;
+    color: var(--text-3);
+    font-family: 'JetBrains Mono', monospace;
+    text-transform: uppercase;
+  }
+
+  /* ── LOADING ── */
+  .loading-obras {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 60px;
+    color: var(--text-2);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+  }
+
+  .spinner {
+    width: 32px;
+    height: 32px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 16px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── ESTADO VAZIO ── */
+  .obras-vazio {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 80px 40px;
+    color: var(--text-2);
+  }
+
+  .obras-vazio-icon { font-size: 48px; margin-bottom: 16px; }
+
+  .obras-vazio-titulo {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--text-1);
+  }
+
+  .obras-vazio-desc {
+    font-size: 13px;
+    font-family: 'JetBrains Mono', monospace;
+    margin-bottom: 24px;
+  }
+
+  /* ── MODAL NOVA OBRA ── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .modal-overlay.aberto { display: flex; }
+
+  .modal {
+    background: var(--bg-card);
+    border: 1px solid var(--border-hi);
+    border-radius: 16px;
+    padding: 36px;
+    width: 100%;
+    max-width: 480px;
+    animation: fadeUp 0.3s ease both;
+  }
+
+  .modal-titulo {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .modal-titulo::before {
+    content: '';
+    display: inline-block;
+    width: 3px;
+    height: 18px;
+    background: var(--accent);
+    border-radius: 2px;
+  }
+
+  .modal-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+  }
+
+  .btn-cancelar {
+    flex: 1;
+    padding: 12px;
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text-2);
+    font-size: 14px;
+    font-family: 'Syne', sans-serif;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+
+  .btn-cancelar:hover { border-color: var(--border-hi); }
+
+  .btn-confirmar {
+    flex: 2;
+    padding: 12px;
+    background: var(--accent);
+    border: none;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    font-family: 'Syne', sans-serif;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .btn-confirmar:hover { background: #2563eb; }
+
+  .btn-confirmar:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  /* ── SELECT ESTILIZADO ── */
+  select {
+    width: 100%;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 13px 16px;
+    font-size: 15px;
+    font-family: 'Syne', sans-serif;
+    color: var(--text-1);
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.2s;
+    appearance: none;
+  }
+
+  select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed;
+    bottom: 32px;
+    right: 32px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-hi);
+    border-radius: 12px;
+    padding: 16px 20px;
+    font-size: 14px;
+    z-index: 300;
+    display: none;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    animation: slideIn 0.3s ease both;
+    max-width: 320px;
+  }
+
+  .toast.visivel { display: flex; }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(20px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+
+  .toast-ok   { border-left: 3px solid var(--success); }
+  .toast-erro { border-left: 3px solid var(--danger); }
+
+  /* ── RESPONSIVO ── */
+  @media (max-width: 640px) {
+    .header { padding: 0 16px; }
+    .portal-body { padding: 24px 16px; }
+    .obras-grid { grid-template-columns: 1fr; }
+    .stats-row { grid-template-columns: repeat(2, 1fr); }
+    .login-box { padding: 32px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════
+     TELA DE LOGIN
+════════════════════════════ -->
+<div id="tela-login">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="login-logo-icon">📦</div>
+      <div class="login-logo-text">ALMOXA <span>PRO</span></div>
+    </div>
+    <div class="login-subtitle">// gestão de obras e almoxarifado</div>
+
+    <div class="campo">
+      <label>Usuário</label>
+      <input type="text" id="inp-user" placeholder="seu usuário" autocomplete="username">
+    </div>
+    <div class="campo">
+      <label>Senha</label>
+      <input type="password" id="inp-pass" placeholder="••••••••" autocomplete="current-password">
+    </div>
+
+    <button class="btn-login" id="btn-login" onclick="fazerLogin()">
+      Entrar no sistema
+    </button>
+
+    <div class="login-erro" id="login-erro"></div>
+    <div class="login-versao">ALMOXA PRO v1.0.0 · dev</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════
+     PORTAL PRINCIPAL
+════════════════════════════ -->
+<div id="tela-portal">
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-logo">
+      <div class="header-logo-icon">📦</div>
+      ALMOXA <span>PRO</span>
+    </div>
+    <div class="header-right">
+      <div class="header-env" id="env-badge">DEV</div>
+      <div class="avatar" id="avatar-user" title="Usuário"></div>
+      <button class="btn-sair" onclick="sair()">Sair</button>
+    </div>
+  </header>
+
+  <!-- CORPO -->
+  <main class="portal-body">
+
+    <!-- BOAS VINDAS -->
+    <div class="boas-vindas">
+      <div class="boas-vindas-titulo">
+        Olá, <span id="nome-usuario">...</span> 👋
+      </div>
+      <div class="boas-vindas-sub" id="info-sessao">carregando sessão...</div>
+    </div>
+
+    <!-- STATS RÁPIDOS -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-label">Total de Obras</div>
+        <div class="stat-valor" id="stat-total">—</div>
+        <div class="stat-desc">cadastradas</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Obras Ativas</div>
+        <div class="stat-valor" style="color:#10b981" id="stat-ativas">—</div>
+        <div class="stat-desc">em andamento</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Pausadas</div>
+        <div class="stat-valor" style="color:#f59e0b" id="stat-pausadas">—</div>
+        <div class="stat-desc">aguardando</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Encerradas</div>
+        <div class="stat-valor" style="color:#64748b" id="stat-encerradas">—</div>
+        <div class="stat-desc">concluídas</div>
+      </div>
+    </div>
+
+    <!-- OBRAS -->
+    <div class="secao-header">
+      <div class="secao-titulo">Minhas Obras</div>
+      <button class="btn-nova-obra" onclick="abrirModalObra()">
+        + Nova Obra
+      </button>
+    </div>
+
+    <div class="obras-grid" id="obras-grid">
+      <div class="loading-obras">
+        <div class="spinner"></div>
+        Carregando obras...
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ════════════════════════════
+     MODAL NOVA OBRA
+════════════════════════════ -->
+<div class="modal-overlay" id="modal-obra">
+  <div class="modal">
+    <div class="modal-titulo">Nova Obra</div>
+
+    <div class="campo">
+      <label>Nome da Obra</label>
+      <input type="text" id="nova-nome" placeholder="ex: Residencial Jardins">
+    </div>
+
+    <div class="campo">
+      <label>Tipo</label>
+      <select id="nova-tipo">
+        <option value="Residencial">🏠 Residencial</option>
+        <option value="Comercial">🏙 Comercial</option>
+        <option value="Industrial">🏭 Industrial</option>
+        <option value="Infraestrutura">🏗 Infraestrutura</option>
+      </select>
+    </div>
+
+    <div class="campo">
+      <label>Cor da Obra</label>
+      <select id="nova-cor">
+        <option value="#3b82f6">🔵 Azul</option>
+        <option value="#10b981">🟢 Verde</option>
+        <option value="#f59e0b">🟡 Amarelo</option>
+        <option value="#8b5cf6">🟣 Roxo</option>
+        <option value="#ef4444">🔴 Vermelho</option>
+        <option value="#ec4899">🩷 Rosa</option>
+      </select>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-cancelar" onclick="fecharModalObra()">Cancelar</button>
+      <button class="btn-confirmar" id="btn-confirmar-obra" onclick="criarObra()">
+        Criar Obra
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <span id="toast-msg"></span>
+</div>
+
+<script>
+// ════════════════════════════
+// CONFIGURAÇÃO
+// ════════════════════════════
+const SCRIPT_URL = ''; // deixe vazio — usa google.script.run
+
+// Estado da sessão
+let SESSAO = null;
+
+// ════════════════════════════
+// INICIALIZAÇÃO
+// ════════════════════════════
+window.addEventListener('load', () => {
+  // Verifica sessão salva
+  const sessaoSalva = sessionStorage.getItem('almoxa_sessao');
+  if (sessaoSalva) {
+    try {
+      SESSAO = JSON.parse(sessaoSalva);
+      entrarNoPortal();
+    } catch(e) {
+      sessionStorage.removeItem('almoxa_sessao');
+    }
+  }
+
+  // Enter no campo senha faz login
+  document.getElementById('inp-pass')
+    .addEventListener('keydown', e => {
+      if (e.key === 'Enter') fazerLogin();
+    });
+
+  document.getElementById('inp-user')
+    .addEventListener('keydown', e => {
+      if (e.key === 'Enter') document.getElementById('inp-pass').focus();
+    });
+});
+
+// ════════════════════════════
+// LOGIN
+// ════════════════════════════
+function fazerLogin() {
+  const user = document.getElementById('inp-user').value.trim();
+  const pass = document.getElementById('inp-pass').value;
+  const erro = document.getElementById('login-erro');
+  const btn  = document.getElementById('btn-login');
+
+  erro.style.display = 'none';
+
+  if (!user || !pass) {
+    mostrarErroLogin('Preencha usuário e senha');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Verificando...';
+
+  // Chama backend via google.script.run
+  google.script.run
+    .withSuccessHandler(resposta => {
+      btn.disabled = false;
+      btn.textContent = 'Entrar no sistema';
+
+      if (resposta.ok) {
+        SESSAO = resposta.data;
+        sessionStorage.setItem('almoxa_sessao', JSON.stringify(SESSAO));
+        entrarNoPortal();
+      } else {
+        mostrarErroLogin(resposta.erro || 'Erro ao fazer login');
+      }
+    })
+    .withFailureHandler(err => {
+      btn.disabled = false;
+      btn.textContent = 'Entrar no sistema';
+      mostrarErroLogin('Erro de conexão com o servidor');
+      console.error(err);
+    })
+    .loginPortal(user, pass);
+}
+
+function mostrarErroLogin(msg) {
+  const el = document.getElementById('login-erro');
+  el.textContent = '⚠ ' + msg;
+  el.style.display = 'block';
+}
+
+// ════════════════════════════
+// PORTAL
+// ════════════════════════════
+function entrarNoPortal() {
+  // Esconde login
+  document.getElementById('tela-login').style.display = 'none';
+  document.getElementById('tela-portal').style.display = 'block';
+
+  // Preenche dados do usuário
+  document.getElementById('nome-usuario').textContent = SESSAO.nome || SESSAO.usuario;
+  document.getElementById('info-sessao').textContent =
+    '// ' + (SESSAO.role || 'operador') + ' · licença ' + (SESSAO.licenca || '—');
+
+  // Avatar
+  const av = document.getElementById('avatar-user');
+  av.textContent = SESSAO.ini || '??';
+  av.style.background = SESSAO.cor || '#3b82f6';
+  av.style.color = '#fff';
+
+  // Carrega obras
+  carregarObras();
+}
+
+function sair() {
+  SESSAO = null;
+  sessionStorage.removeItem('almoxa_sessao');
+  document.getElementById('tela-login').style.display = 'flex';
+  document.getElementById('tela-portal').style.display = 'none';
+  document.getElementById('inp-pass').value = '';
+  document.getElementById('login-erro').style.display = 'none';
+}
+
+// ════════════════════════════
+// OBRAS
+// ════════════════════════════
+function carregarObras() {
+  const grid = document.getElementById('obras-grid');
+  grid.innerHTML = `
+    <div class="loading-obras">
+      <div class="spinner"></div>
+      Carregando obras...
+    </div>`;
+
+  google.script.run
+    .withSuccessHandler(resposta => {
+      if (resposta.ok) {
+        renderizarObras(resposta.data || []);
+      } else {
+        grid.innerHTML = `
+          <div class="obras-vazio">
+            <div class="obras-vazio-icon">⚠️</div>
+            <div class="obras-vazio-titulo">Erro ao carregar</div>
+            <div class="obras-vazio-desc">${resposta.erro || 'Tente novamente'}</div>
+          </div>`;
+      }
+    })
+    .withFailureHandler(err => {
+      grid.innerHTML = `
+        <div class="obras-vazio">
+          <div class="obras-vazio-icon">🔌</div>
+          <div class="obras-vazio-titulo">Sem conexão</div>
+          <div class="obras-vazio-desc">Verifique o backend</div>
+        </div>`;
+      console.error(err);
+    })
+    .listarSalasPortal(SESSAO.licenca || '');
+}
+
+function renderizarObras(obras) {
+  const grid = document.getElementById('obras-grid');
+
+  // Atualiza stats
+  document.getElementById('stat-total').textContent     = obras.length;
+  document.getElementById('stat-ativas').textContent    = obras.filter(o => o.status === 'ativo').length;
+  document.getElementById('stat-pausadas').textContent  = obras.filter(o => o.status === 'pausado').length;
+  document.getElementById('stat-encerradas').textContent = obras.filter(o => o.status === 'encerrado').length;
+
+  if (obras.length === 0) {
+    grid.innerHTML = `
+      <div class="obras-vazio">
+        <div class="obras-vazio-icon">🏗</div>
+        <div class="obras-vazio-titulo">Nenhuma obra cadastrada</div>
+        <div class="obras-vazio-desc">Clique em "Nova Obra" para começar</div>
+      </div>`;
+    return;
+  }
+
+  grid.innerHTML = obras.map(obra => `
+    <div class="obra-card" style="--obra-cor: ${obra.cor || '#3b82f6'}"
+         onclick="abrirObra('${obra.id}', '${obra.nome}')">
+      <div class="obra-card-top">
+        <div class="obra-icone">${obra.icone || '🏗'}</div>
+        <div class="obra-status status-${obra.status || 'ativo'}">
+          ${obra.status || 'ativo'}
+        </div>
+      </div>
+      <div class="obra-nome">${obra.nome}</div>
+      <div class="obra-tipo">${obra.tipo || 'Obra'}</div>
+      <hr class="obra-divider">
+      <div class="obra-stats">
+        <div class="obra-stat">
+          <div class="obra-stat-val" style="color:${obra.cor || '#3b82f6'}">
+            ${obra.tarefas || 0}
+          </div>
+          <div class="obra-stat-label">tarefas</div>
+        </div>
+        <div class="obra-stat">
+          <div class="obra-stat-val">${obra.membros || 0}</div>
+          <div class="obra-stat-label">membros</div>
+        </div>
+        <div class="obra-stat">
+          <div class="obra-stat-val" style="color:#ef4444">
+            ${obra.ocorrencias || 0}
+          </div>
+          <div class="obra-stat-label">ocorr.</div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function abrirObra(id, nome) {
+  // Futuramente: navega para o módulo da obra
+  mostrarToast('🏗 Abrindo: ' + nome, 'ok');
+}
+
+// ════════════════════════════
+// MODAL NOVA OBRA
+// ════════════════════════════
+function abrirModalObra() {
+  document.getElementById('modal-obra').classList.add('aberto');
+  document.getElementById('nova-nome').focus();
+}
+
+function fecharModalObra() {
+  document.getElementById('modal-obra').classList.remove('aberto');
+  document.getElementById('nova-nome').value = '';
+}
+
+function criarObra() {
+  const nome = document.getElementById('nova-nome').value.trim();
+  const tipo = document.getElementById('nova-tipo').value;
+  const cor  = document.getElementById('nova-cor').value;
+  const btn  = document.getElementById('btn-confirmar-obra');
+
+  if (!nome) {
+    mostrarToast('⚠ Informe o nome da obra', 'erro');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Criando...';
+
+  google.script.run
+    .withSuccessHandler(resposta => {
+      btn.disabled = false;
+      btn.textContent = 'Criar Obra';
+
+      if (resposta.ok) {
+        fecharModalObra();
+        mostrarToast('✅ Obra criada com sucesso!', 'ok');
+        carregarObras();
+      } else {
+        mostrarToast('⚠ ' + (resposta.erro || 'Erro ao criar obra'), 'erro');
+      }
+    })
+    .withFailureHandler(err => {
+      btn.disabled = false;
+      btn.textContent = 'Criar Obra';
+      mostrarToast('🔌 Erro de conexão', 'erro');
+      console.error(err);
+    })
+    .criarSalaPortal(
+      nome,
+      tipo,
+      cor,
+      SESSAO.licenca || '',
+      SESSAO.usuario || 'sistema'
+    );
+}
+
+// ════════════════════════════
+// TOAST
+// ════════════════════════════
+function mostrarToast(msg, tipo) {
+  const toast = document.getElementById('toast');
+  const msgEl = document.getElementById('toast-msg');
+
+  toast.className = 'toast visivel toast-' + (tipo || 'ok');
+  msgEl.textContent = msg;
+
+  setTimeout(() => {
+    toast.classList.remove('visivel');
+  }, 3500);
+}
+
+// Fecha modal clicando fora
+document.getElementById('modal-obra').addEventListener('click', function(e) {
+  if (e.target === this) fecharModalObra();
+});
+</script>
+</body>
+</html>
